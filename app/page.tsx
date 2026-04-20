@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -225,7 +225,11 @@ export default function Dashboard() {
                     <XAxis dataKey="name" tick={{ fill: '#8888aa', fontSize: 12, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: '#8888aa', fontSize: 11, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
                     <Tooltip
-                      formatter={(v: number) => [`${v}%`, 'Loss Ratio']}
+                      formatter={(value: number | string | readonly (number | string)[] | undefined) => {
+                        const rawValue = Array.isArray(value) ? value[0] : value
+                        const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0)
+                        return [`${numericValue}%`, 'Loss Ratio'] as [string, string]
+                      }}
                       contentStyle={{ background: '#16161f', border: '1px solid #2a2a38', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12 }}
                       labelStyle={{ color: '#f0f0f8' }}
                     />
@@ -265,7 +269,11 @@ export default function Dashboard() {
                     <Tooltip
                       contentStyle={{ background: '#16161f', border: '1px solid #2a2a38', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12 }}
                       labelStyle={{ color: '#f0f0f8' }}
-                      formatter={(v: number) => [`${v.toLocaleString()} JOD`]}
+                      formatter={(value: number | string | readonly (number | string)[] | undefined) => {
+                        const rawValue = Array.isArray(value) ? value[0] : value
+                        const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0)
+                        return `${numericValue.toLocaleString()} JOD`
+                      }}
                     />
                     <Line type="monotone" dataKey="premium" stroke="#4ade9a" strokeWidth={2} dot={false} name="Premium" />
                     <Line type="monotone" dataKey="claims" stroke="#f55a5a" strokeWidth={2} dot={false} name="Claims" />
@@ -397,10 +405,17 @@ export default function Dashboard() {
 
 // Full chat page embedded in tab
 function FullChat() {
-  const [messages, setMessages] = useState([
+  type Message = {
+    id: string;
+    role: 'assistant' | 'user';
+    content: string;
+    timestamp: Date;
+  };
+
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '0',
-      role: 'assistant' as const,
+      role: 'assistant',
       content: 'مرحباً! أنا مساعدك الذكي لتحليل بيانات MedGulf.\n\nHello! Ask me anything about your insurance portfolio — loss ratios, claims, agent performance, vehicle types, forecasts, and strategic recommendations.',
       timestamp: new Date(),
     }
