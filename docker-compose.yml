@@ -3,7 +3,7 @@ services:
   # ─── Next.js Dashboard ───────────────────────────────────────────
   dashboard:
     build:
-      context: ./medgulf-dashboard
+      context: .
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_N8N_WEBHOOK_URL: ${NEXT_PUBLIC_N8N_WEBHOOK_URL}
